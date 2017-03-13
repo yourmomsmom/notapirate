@@ -1,0 +1,50 @@
+version: "2.1"
+
+services:
+  deluge:
+    image: linuxserver/deluge:latest
+    volumes:
+      - ./data:/data
+      - ./config/deluge:/config
+    ports:
+      - 8112:8112
+    environment:
+      - PUID=${PUID:-99}
+      - PGID=${PGID:-99}
+      - TZ="UTC"
+  sonarr:
+    image: linuxserver/sonarr:latest
+    volumes:
+      - ./data:/data
+      - ./config/sonarr:/config
+      - /dev/rtc:/dev/rtc:ro
+    ports:
+      - 8989:8989
+    environment:
+      - PUID=${PUID:-99}
+      - PGID=${PGID:-99}
+      - TZ="UTC"
+    depends_on:
+      - deluge
+#  couchpotato:
+#    image: linuxserver/couchpotato:latest
+#    volumes:
+#      - ./data:/data
+#      - ./config/couchpotato:/config
+#    ports:
+#      - 5050:5050
+#    environment:
+#      - PUID=${PUID:-99}
+#      - PGID=${PGID:-99}
+#      - TZ="Europe/Bucharest"
+  cardigann:
+    image: linuxserver/cardigann:latest
+    volumes:
+      - ./config/cardigann:/config
+    ports:
+      - 5060:5060
+    environment:
+      - PUID=${PUID:-99}
+      - PGID=${PGID:-99}
+    depends_on:
+      - sonarr

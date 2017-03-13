@@ -1,0 +1,17 @@
+{
+  "eztv": {
+    "enabled": "true",
+    "password": "",
+    "url": "https://eztv.ag/",
+    "username": ""
+  },
+  "global": {
+    "apikey": "3424038c6acdf589062c49b1a18ba932"
+  },
+  "thepiratebay": {
+    "enabled": "true",
+    "password": "",
+    "url": "https://thepiratebay.org/",
+    "username": ""
+  }
+}

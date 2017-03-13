@@ -1,0 +1,5 @@
+data/downloads/*
+data/movies/*
+data/tv/*
+.env
+!.gitignore
