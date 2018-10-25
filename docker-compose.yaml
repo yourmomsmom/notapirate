@@ -1,6 +1,28 @@
 version: "2.1"
 
 services:
+  traefik:
+    image: containous/traefik:latest
+    volumes:
+      - ./config/traefik/traefik.toml:/traefik.toml
+      - ./config/traefik/acme.json:/acme.json
+      # Path to Docker socket on your machine
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - PUID=${PUID:-99}
+      - PGID=${PGID:-99}
+      - TZ="UTC"
+    networks:
+      - internal
+    labels:
+      - "traefik.frontend.rule=PathPrefix:/dashboard,/api,/metrics,/health"
+      - "traefik.enable=true"
+      - "traefik.port=8080"
+      - "traefik.frontend.auth.basic=${HTTP_USERNAME}:${HTTP_PASSWORD}"
+    restart: always
   deluge:
     image: linuxserver/deluge:latest
     volumes:
@@ -12,6 +34,14 @@ services:
       - PUID=${PUID:-99}
       - PGID=${PGID:-99}
       - TZ="UTC"
+    networks:
+      - internal
+    labels:
+      - "traefik.frontend.rule=PathPrefixStrip:/deluge"
+      - "traefik.enable=true"
+      - "traefik.frontend.auth.basic=${HTTP_USERNAME}:${HTTP_PASSWORD}"
+      - "traefik.frontend.headers.customresponseheaders=X-Frame-Options:SAMEORIGIN"
+    restart: always
   sonarr:
     image: linuxserver/sonarr:latest
     volumes:
@@ -25,26 +55,69 @@ services:
       - PGID=${PGID:-99}
       - TZ="UTC"
     depends_on:
-      - deluge
-#  couchpotato:
-#    image: linuxserver/couchpotato:latest
-#    volumes:
-#      - ./data:/data
-#      - ./config/couchpotato:/config
-#    ports:
-#      - 5050:5050
-#    environment:
-#      - PUID=${PUID:-99}
-#      - PGID=${PGID:-99}
-#      - TZ="Europe/Bucharest"
-  cardigann:
-    image: linuxserver/cardigann:latest
+      - jackett
+    networks:
+      - internal
+    labels:
+      - "traefik.frontend.rule=PathPrefix:/sonarr"
+      - "traefik.enable=true"
+      - "traefik.frontend.auth.basic=${HTTP_USERNAME}:${HTTP_PASSWORD}"
+    restart: always
+  jackett:
+    image: linuxserver/jackett:latest
     volumes:
-      - ./config/cardigann:/config
+      - ./config/jackett:/config
     ports:
-      - 5060:5060
+      - 9117:9117
     environment:
       - PUID=${PUID:-99}
       - PGID=${PGID:-99}
     depends_on:
-      - sonarr
+      - deluge
+    networks:
+      - internal
+    labels:
+      - "traefik.frontend.rule=PathPrefix:/jackett"
+      - "traefik.enable=true"
+      - "traefik.frontend.auth.basic=${HTTP_USERNAME}:${HTTP_PASSWORD}"
+    restart: always
+  radarr:
+    image: linuxserver/radarr:latest
+    volumes:
+      - ./data:/data
+      - ./config/radarr:/config
+      - /dev/rtc:/dev/rtc:ro
+    ports:
+      - 7878:7878
+    environment:
+      - PUID=${PUID:-99}
+      - PGID=${PGID:-99}
+      - TZ="UTC"
+    depends_on:
+      - jackett
+    networks:
+      - internal
+    labels:
+      - "traefik.frontend.rule=PathPrefix:/radarr"
+      - "traefik.enable=true"
+      - "traefik.frontend.auth.basic=${HTTP_USERNAME}:${HTTP_PASSWORD}"
+    restart: always
+  plex:
+    image: linuxserver/plex:latest
+    volumes:
+      - ./config/plex:/config
+      - ./data/transcode:/transcode
+      - ./data/tv:/data/tvshows
+      - ./data/movies:/data/movies
+    environment:
+      - PUID=${PUID:-99}
+      - PGID=${PGID:-99}
+      - TZ="UTC"
+      - VERSION=latest
+    network_mode: host
+    restart: always
+
+networks:
+  internal:
+    driver: bridge
+

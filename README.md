@@ -6,16 +6,16 @@ It uses the following docker images from [linuxserver.io](http://tools.linuxserv
 
 * linuxserver/deluge        - download client
 * linuxserver/sonarr        - TV Series manager
-* linuxserver/couchpotato   - Movies manager (WIP)
-* linuxserver/cardigann     - Sonarr indexer proxy server
+* linuxserver/radarr        - Movies manager
+* linuxserver/jackett       - Sonarr indexer proxy server
 
-It is preconfigured and ready to go and includes [EZTV](https://eztv.ag/) and [The Pirate Bay](http://thepiratebay.se/) but more trackers can be added via Cardigann if needed.
+It is preconfigured and ready to go and includes [EZTV](https://eztv.ag/) and [The Pirate Bay](http://thepiratebay.se/) but more trackers can be added via Jackett if needed.
 
 Each component can be accessed using the following URLs:
 
-* Sonarr:    http://dockerhost:8989 (main interface)
-* Cardigann: http://dockerhost:5060
-* Deluge:    http://dockerhost:8112 (password: deluge)
+* Sonarr:    https://dockerhost/sonarr
+* Radarr     https://dockerhost/radarr
+* Deluge:    http://dockerhost/deluge (password: deluge)
 
 ----------------------------------------
 ### Running
